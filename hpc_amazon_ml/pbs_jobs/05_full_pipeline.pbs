@@ -1,0 +1,56 @@
+#!/bin/bash
+#PBS -P futurematlab1.npn
+#PBS -q standard
+#PBS -N amz_full_pipeline
+#PBS -l select=1:ncpus=24:mem=120gb:centos=skylake
+#PBS -l walltime=10:00:00
+#PBS -j oe
+#PBS -o /scratch/civil/btech/ce1240901/amazon_ml/logs/full_pipeline.out
+
+# ==============================================================================
+# IIT Delhi HPC PADUM - End-to-End Amazon ML Challenge Full Pipeline
+# Model: Business Entity Resolution V6 (Target: >= 0.99 Macro F0.5)
+# Nodes: 24 Skylake Cores, 120 GB RAM
+# ==============================================================================
+set -euo pipefail
+
+PROJ_DIR="/scratch/civil/btech/ce1240901/amazon_ml"
+REPO_DIR="${PROJ_DIR}/repo"
+CPU_ENV="${PROJ_DIR}/env"
+
+mkdir -p "${PROJ_DIR}/logs" "${PROJ_DIR}/models" "${PROJ_DIR}/output" "${PROJ_DIR}/submissions"
+cd "${PROJ_DIR}"
+
+export NCPUS=${NCPUS:-24}
+echo "=========================================================="
+echo "Starting Full Pipeline on $(hostname) at $(date)"
+echo "Cores: ${NCPUS} | Scratch Dir: ${PROJ_DIR}"
+echo "=========================================================="
+
+echo ">>> STEP 1: Full-Scale Training (100% Data) <<<"
+"${CPU_ENV}/bin/python" "${REPO_DIR}/hpc_amazon_ml/scripts/02_train_hpc.py" \
+    --data-dir "${PROJ_DIR}/dataset" \
+    --output-dir "${PROJ_DIR}/models" \
+    --train-s1-frac 1.0 \
+    --num-leaves 127 \
+    --n-estimators 1500 \
+    --learning-rate 0.03 \
+    --n-seeds 3
+
+echo ">>> STEP 2: Full Test Set Prediction & Packaging <<<"
+"${CPU_ENV}/bin/python" "${REPO_DIR}/hpc_amazon_ml/scripts/04_predict_submission.py" \
+    --data-dir "${PROJ_DIR}/dataset" \
+    --model-dir "${PROJ_DIR}/models" \
+    --output-dir "${PROJ_DIR}/output" \
+    --submission-dir "${PROJ_DIR}/submissions"
+
+echo ">>> STEP 3: Submission Verification & Quality Checks <<<"
+"${CPU_ENV}/bin/python" "${REPO_DIR}/student_resource/code/src/utils/validate_submission.py" \
+    --candidate-pairs "${PROJ_DIR}/output/candidate_pairs.tsv" \
+    --matching-results "${PROJ_DIR}/output/matching_results.tsv" \
+    --test-path "${PROJ_DIR}/dataset/test.tsv"
+
+echo "=========================================================="
+echo "ALL PIPELINE STEPS COMPLETED SUCCESSFULLY AT $(date)"
+echo "Final Submission Archive: ${PROJ_DIR}/submissions/TCC_submission_hpc_v6.zip"
+echo "=========================================================="

@@ -1,0 +1,35 @@
+#!/bin/bash
+#PBS -P futurematlab1.npn
+#PBS -q standard
+#PBS -N amz_predict_v6
+#PBS -l select=1:ncpus=24:mem=96gb:centos=skylake
+#PBS -l walltime=04:00:00
+#PBS -j oe
+#PBS -o /scratch/civil/btech/ce1240901/amazon_ml/logs/predict.out
+
+PROJ_DIR="/scratch/civil/btech/ce1240901/amazon_ml"
+REPO_DIR="${PROJ_DIR}/repo"
+CPU_ENV="${PROJ_DIR}/env"
+
+mkdir -p "${PROJ_DIR}/logs" "${PROJ_DIR}/output" "${PROJ_DIR}/submissions"
+cd "${PROJ_DIR}"
+
+export NCPUS=${NCPUS:-24}
+echo "Running prediction on $(hostname) with ${NCPUS} cores at $(date)"
+
+"${CPU_ENV}/bin/python" "${REPO_DIR}/hpc_amazon_ml/scripts/04_predict_submission.py" \
+    --data-dir "${PROJ_DIR}/dataset" \
+    --model-dir "${PROJ_DIR}/models" \
+    --output-dir "${PROJ_DIR}/output" \
+    --submission-dir "${PROJ_DIR}/submissions"
+
+# Run validation on the generated files
+if [ -f "${REPO_DIR}/student_resource/code/src/utils/validate_submission.py" ]; then
+    echo "Running submission validation..."
+    "${CPU_ENV}/bin/python" "${REPO_DIR}/student_resource/code/src/utils/validate_submission.py" \
+        --candidate-pairs "${PROJ_DIR}/output/candidate_pairs.tsv" \
+        --matching-results "${PROJ_DIR}/output/matching_results.tsv" \
+        --test-path "${PROJ_DIR}/dataset/test.tsv"
+fi
+
+echo "Prediction and packaging complete at $(date)"

@@ -1,0 +1,16 @@
+#!/bin/bash
+#PBS -P futurematlab1.npn
+#PBS -q standard
+#PBS -N amz_env_setup
+#PBS -l select=1:ncpus=4:mem=24gb
+#PBS -l walltime=01:30:00
+#PBS -j oe
+#PBS -o /scratch/civil/btech/ce1240901/amazon_ml/logs/env_setup.out
+
+PROJ_DIR="/scratch/civil/btech/ce1240901/amazon_ml"
+mkdir -p "${PROJ_DIR}/logs"
+cd "${PROJ_DIR}"
+
+echo "Job started on node: $(hostname) at $(date)"
+bash "${PROJ_DIR}/scripts/01_setup_scratch_env.sh"
+echo "Job finished at $(date)"

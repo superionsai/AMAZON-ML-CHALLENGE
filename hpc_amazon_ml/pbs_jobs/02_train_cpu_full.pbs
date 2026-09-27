@@ -1,0 +1,35 @@
+#!/bin/bash
+#PBS -P futurematlab1.npn
+#PBS -q standard
+#PBS -N amz_train_v6
+#PBS -l select=1:ncpus=24:mem=120gb:centos=skylake
+#PBS -l walltime=08:00:00
+#PBS -j oe
+#PBS -o /scratch/civil/btech/ce1240901/amazon_ml/logs/train_full.out
+
+PROJ_DIR="/scratch/civil/btech/ce1240901/amazon_ml"
+REPO_DIR="${PROJ_DIR}/repo"
+CPU_ENV="${PROJ_DIR}/env"
+
+mkdir -p "${PROJ_DIR}/logs" "${PROJ_DIR}/models"
+cd "${PROJ_DIR}"
+
+echo "=========================================================="
+echo "Job amz_train_v6 started on $(hostname) at $(date)"
+echo "Selected resources: 24 Skylake cores, 120 GB RAM"
+# In PBS, $NCPUS holds the allocated core count (Gotcha #12)
+export NCPUS=${NCPUS:-24}
+echo "Cores allocated (NCPUS): ${NCPUS}"
+echo "=========================================================="
+
+# Activate scratch environment and run training on 100% data
+"${CPU_ENV}/bin/python" "${REPO_DIR}/hpc_amazon_ml/scripts/02_train_hpc.py" \
+    --data-dir "${PROJ_DIR}/dataset" \
+    --output-dir "${PROJ_DIR}/models" \
+    --train-s1-frac 1.0 \
+    --num-leaves 127 \
+    --n-estimators 1500 \
+    --learning-rate 0.03 \
+    --n-seeds 3
+
+echo "Job finished at $(date)"

@@ -1,0 +1,28 @@
+#!/bin/bash
+#PBS -P futurematlab1.npn
+#PBS -q standard
+#PBS -N amz_biencoder_gpu
+#PBS -l select=1:ncpus=8:mem=64gb:ngpus=1:centos=skylake
+#PBS -l walltime=06:00:00
+#PBS -j oe
+#PBS -o /scratch/civil/btech/ce1240901/amazon_ml/logs/biencoder_gpu.out
+
+PROJ_DIR="/scratch/civil/btech/ce1240901/amazon_ml"
+REPO_DIR="${PROJ_DIR}/repo"
+GPU_ENV="${PROJ_DIR}/env_gpu"
+
+mkdir -p "${PROJ_DIR}/logs" "${PROJ_DIR}/models/biencoder"
+cd "${PROJ_DIR}"
+
+echo "=========================================================="
+echo "Job amz_biencoder_gpu started on $(hostname) at $(date)"
+nvidia-smi
+echo "=========================================================="
+
+"${GPU_ENV}/bin/python" "${REPO_DIR}/hpc_amazon_ml/scripts/03_train_semantic_biencoder.py" \
+    --data-dir "${PROJ_DIR}/dataset" \
+    --output-dir "${PROJ_DIR}/models/biencoder" \
+    --batch-size 64 \
+    --epochs 3
+
+echo "Job finished at $(date)"
