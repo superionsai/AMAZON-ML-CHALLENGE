@@ -1,0 +1,15 @@
+# Tested with Python 3.11. Before final submission, pin exact versions from your environment:
+#   python -m pip freeze | findstr /i "pandas numpy scipy scikit lightgbm rapidfuzz anyascii sparse torch transformers sentence"
+pandas>=2.2
+numpy>=1.26
+scipy>=1.11
+scikit-learn>=1.4
+lightgbm>=4.3              # MIT
+rapidfuzz>=3.6             # MIT (process.cpdist)
+anyascii>=0.3.2            # ISC
+sparse_dot_topn>=1.1       # Apache-2.0
+# neural extras (--use-emb / --use-ce); CUDA build: pip install torch --index-url https://download.pytorch.org/whl/cu126
+torch>=2.3                 # BSD-3
+transformers>=4.40         # Apache-2.0
+sentence-transformers>=3.0 # Apache-2.0
+# model weights: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2 (Apache-2.0, 118M params)

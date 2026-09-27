@@ -1,0 +1,23 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyd
+
+# Large archives and binaries (>100MB exceeds GitHub push limits)
+*.zip
+*.mp4
+*.pdf
+*.pkl
+*.npy
+
+# Dataset and output files
+dataset/
+student_resource/dataset/
+output/
+student_resource/output/
+student_resource/models_*/
+models_*/
+submissions/
+artifacts/
+scratch_*.txt
